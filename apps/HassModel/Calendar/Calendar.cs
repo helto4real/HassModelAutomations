@@ -18,7 +18,7 @@ public class GoogleCalendarManager
         var entities = new Entities(ha);
         entities.Calendar.TaUtSopor
             .StateAllChanges
-            // .Where(e => e.New?.State == "on")
+            .Where(e => e.New?.State == "on")
             .Subscribe(s =>
                 {
                     _tts.Speak("media_player.huset", "Viktigt meddelande"); // Important message
