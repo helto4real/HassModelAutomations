@@ -24,6 +24,7 @@ namespace NetDaemon.HassModel.Extensions
 
         }
 
+
         public static void TurnOn(this IHaContext ha, params string[] entityIds)
         {
             if (entityIds.Length == 0)
@@ -38,6 +39,25 @@ namespace NetDaemon.HassModel.Extensions
                 throw new ArgumentNullException(nameof(entityIds));
 
             ha.CallService(GetDomainForServiceCall(entityIds), "turn_off", new ServiceTarget { EntityIds = entityIds });
+        }
+
+        public static void TurnOn(this IHaContext ha, string entityId, object attributes)
+        {
+            var entityIds = new[] { entityId };
+
+            ha.CallService(GetDomainForServiceCall(entityIds), "turn_on", new ServiceTarget { EntityIds = entityIds }, attributes);
+        }
+
+        public static void TurnOff(this IHaContext ha, string entityId, object attributes)
+        {
+            var entityIds = new[] { entityId };
+
+            ha.CallService(GetDomainForServiceCall(entityIds), "turn_off", new ServiceTarget { EntityIds = entityIds }, attributes);
+        }
+
+        public static void RunScript(this IHaContext ha, string script)
+        {
+            ha.CallService("script", script);
         }
     }
 }

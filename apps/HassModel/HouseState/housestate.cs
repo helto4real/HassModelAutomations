@@ -12,11 +12,11 @@ using Microsoft.Extensions.Logging;
 ///     Manage state of morning, house, day, evening, night and cleaning
 /// </summary>
 [NetDaemonApp]
-[Focus]
+// [Focus]
 public class HouseStateManager
 {
-    private readonly TimeSpan NIGHTTIME_WEEKDAYS = TimeSpan.Parse("10:30:00");
-    private readonly TimeSpan NIGHTTIME_WEEKENDS = TimeSpan.Parse("11:30:00");
+    private readonly TimeSpan NIGHTTIME_WEEKDAYS = TimeSpan.Parse("22:30:00");
+    private readonly TimeSpan NIGHTTIME_WEEKENDS = TimeSpan.Parse("23:30:00");
     private readonly TimeSpan DAYTIME = TimeSpan.Parse("05:00:00");
     private readonly Entities _entities;
     private readonly INetDaemonScheduler _scheduler;
