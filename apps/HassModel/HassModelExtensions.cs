@@ -24,7 +24,6 @@ namespace NetDaemon.HassModel.Extensions
 
         }
 
-
         public static void TurnOn(this IHaContext ha, params string[] entityIds)
         {
             if (entityIds.Length == 0)

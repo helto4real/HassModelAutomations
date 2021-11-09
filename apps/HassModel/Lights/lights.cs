@@ -35,12 +35,13 @@ public class LightManager : IInitializable
     public LightEntity? ElgatoKeyLight { get; set; }
     public InputSelectEntity? HouseModeSelect { get; set; }
 
-    private readonly IHaContext _ha;
     private readonly Entities _entities;
+
+    private readonly Services _services;
     public LightManager(IHaContext ha)
     {
-        _ha = ha;
         _entities = new Entities(ha);
+        _services = new Services(ha);
     }
 
     public void Initialize()
@@ -108,7 +109,7 @@ public class LightManager : IInitializable
         HouseModeSelect?
             .StateChanges
             .Where(e => e.New?.State == "Städning")
-            .Subscribe(s => _ha.RunScript("script.cleaning_scene"));
+            .Subscribe(s => _services.Script.CleaningScene());
     }
 
 
