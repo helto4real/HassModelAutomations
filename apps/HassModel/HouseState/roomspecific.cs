@@ -54,7 +54,7 @@ public class RoomSpecificManager
     {
         // Turn on computer if Tomas is home and enter room
         _entities.BinarySensor.TomasRumPir
-            .StateChanges
+            .StateChanges()
             .Where(e =>
                 e.New.IsOn() &&
                 _entities.Switch.ComputerTomas.IsOff() &&
@@ -64,7 +64,7 @@ public class RoomSpecificManager
 
         // Turn off computer if no movement for one hour en Tomas room
         _entities.BinarySensor.TomasRumPir
-            .StateChanges
+            .StateChanges()
             .Where(e => e.New.IsOff())
             .Throttle(TimeSpan.FromHours(1))
             .Subscribe(s => _entities.Switch.ComputerTomas.TurnOff());

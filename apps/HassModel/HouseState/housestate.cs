@@ -17,7 +17,7 @@ public class HouseStateManager
 {
     private readonly TimeSpan NIGHTTIME_WEEKDAYS = TimeSpan.Parse("22:30:00");
     private readonly TimeSpan NIGHTTIME_WEEKENDS = TimeSpan.Parse("23:30:00");
-    private readonly TimeSpan DAYTIME = TimeSpan.Parse("05:00:00");
+    private readonly TimeSpan DAYTIME = TimeSpan.Parse("09:00:00");
     private readonly Entities _entities;
     private readonly INetDaemonScheduler _scheduler;
     private readonly ILogger<HouseStateManager> _log;
@@ -102,7 +102,7 @@ public class HouseStateManager
     private void SetEveningWhenLowLightLevel()
     {
         _entities.Sensor.LightOutside
-            .StateChanges
+            .StateChanges()
             .Where(e => _entities.Sensor.LightOutside.AsNumeric().State <= 25.0 && IsDaytime)
             .Subscribe(s => SetHouseState(HouseState.Evening));
     }
@@ -113,7 +113,7 @@ public class HouseStateManager
     private void SetMorningWhenBrightLightLevel()
     {
         _entities.Sensor.LightOutside
-            .StateChanges
+            .StateChanges()
             .Where(e => _entities.Sensor.LightOutside.AsNumeric().State >= 30.0 &&
                         DateTime.Now.Hour > 5 && DateTime.Now.Hour < 10 &&
                         IsNighttime
@@ -137,7 +137,7 @@ public class HouseStateManager
             HouseState.Cleaning => "Städning",
             _ => throw new ArgumentException("Not supported", nameof(state))
         };
-        // _entities.InputSelect.HouseModeSelect.SelectOption(option: select_state);
+        _entities.InputSelect.HouseModeSelect.SelectOption(option: select_state);
     }
 }
 

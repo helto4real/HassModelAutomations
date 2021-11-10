@@ -52,7 +52,7 @@ public class LightManager : IInitializable
 
         // handle keylights
         TomasRoomPir?
-            .StateChanges
+            .StateChanges()
             .Where(e =>
                 e.New.IsOff() &&
                 e.Old.IsOn() &&
@@ -62,7 +62,7 @@ public class LightManager : IInitializable
             .Subscribe(s => ElgatoKeyLight?.TurnOff(transition: 0));
 
         TomasRoomPir?
-            .StateChanges
+            .StateChanges()
             .Where(e =>
                 e.New.IsOn() &&
                 e.Old.IsOff() &&
@@ -87,27 +87,27 @@ public class LightManager : IInitializable
     private void InitializeTimeOfDayScenes()
     {
         HouseModeSelect?
-            .StateChanges
+            .StateChanges()
             .Where(e => e.New?.State == "Dag")
             .Subscribe(s => TurnOffAmbient());
 
         HouseModeSelect?
-            .StateChanges
+            .StateChanges()
             .Where(e => e.New?.State == "Kväll")
             .Subscribe(s => TurnOnAmbient());
 
         HouseModeSelect?
-            .StateChanges
+            .StateChanges()
             .Where(e => e.New?.State == "Natt")
             .Subscribe(s => TurnOffAmbient());
 
         HouseModeSelect?
-            .StateChanges
+            .StateChanges()
             .Where(e => e.New?.State == "Morgon")
             .Subscribe(s => TurnOffAmbient());
 
         HouseModeSelect?
-            .StateChanges
+            .StateChanges()
             .Where(e => e.New?.State == "Städning")
             .Subscribe(s => _services.Script.CleaningScene());
     }
@@ -188,7 +188,7 @@ public class LightManager : IInitializable
 
         // Kitchen night lights
         KitchenPir?
-            .StateChanges
+            .StateChanges()
             .Where(e =>
                 e.New.IsOn() &&
                 e.Old.IsOff() &&
@@ -196,7 +196,7 @@ public class LightManager : IInitializable
             .Subscribe(s => _entities.Light.Kok.TurnOn(transition: 0));
 
         KitchenPir?
-            .StateChanges
+            .StateChanges()
             .Where(e =>
                 e.New.IsOff() &&
                 e.Old.IsOn() &&
