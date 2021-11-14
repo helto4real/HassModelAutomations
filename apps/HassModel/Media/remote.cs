@@ -1,8 +1,14 @@
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
 using System.Reactive.Linq;
-using NetDaemon.Common.Reactive;
+using HomeAssistantGenerated;
+using Microsoft.Extensions.Logging;
+using NetDaemon.Common;
+using NetDaemon.Extensions.Scheduler;
+using NetDaemon.HassModel.Common;
+using NetDaemon.HassModel.Entities;
+using NetDaemon.HassModel.Extensions;
 
 /// <summary>
 ///     Manage remote control using a xiaomi magic cube.
@@ -12,38 +18,38 @@ using NetDaemon.Common.Reactive;
 ///     - Turn counter clockwise, volume down
 ///     - Flip, pause/play
 /// </summary>
-public class MagicCubeRemoteControlManager : NetDaemonRxApp
+[NetDaemonApp]
+[Focus]
+public class MagicCubeRemoteControlManager : IInitializable
 {
+    // private readonly IHaContext _ha;
+    private readonly Entities _entities;
+
     #region -- Config properties --
 
-    public string? RemoteTVRummet { get; set; }
-    public int? MaranzDeviceId { get; set; }
-    public IEnumerable<string>? TvMediaPlayers { get; set; }
+    public RemoteEntity? RemoteTVRummet { get; set; }
+    public string? MaranzDeviceId { get; set; }
+    public IEnumerable<MediaPlayerEntity>? TvMediaPlayers { get; set; }
 
     #endregion
-    public override void Initialize()
+
+    public MagicCubeRemoteControlManager(IHaContext ha)
     {
-        // 00:15:8d:00:02:69:e8:63
-        Entity("sensor.tvrum_cube")
-            .StateChanges
-            // .Where(
-            //     e => e.Event == "deconz_event" &&
-            //          e.Data?.id == "tvrum_cube")
+        // _ha = ha;
+        _entities = new Entities(ha);
+    }
+    public void Initialize()
+    {
+        _entities.Sensor.TvrumCube.StateChanges()
             .Subscribe(s =>
             {
-                // if (s.New is object)
-                //     Log("CUBE: state: {state}\r\n   action:{action}\r\n   side: {side}\r\n   angle: {angle}", 
-                //         s.New?.State,
-                //         s.New?.Attribute?.action,
-                //         s.New?.Attribute?.side,
-                //         s.New?.Attribute?.angle);
                 if (s.New?.State is null)
-                     return;
+                    return;
 
                 switch (s.New?.State)
                 {
                     case "shake":         // Shake
-                        Entity(RemoteTVRummet!).Toggle();
+                        _entities.Remote.Tvrummet.Toggle();
                         break;
                     case "flip90":         // Flip
                         PlayPauseMedia();
@@ -55,8 +61,7 @@ public class MagicCubeRemoteControlManager : NetDaemonRxApp
                         VolumeDown();
                         break;
                 }
-            }
-            );
+            });
     }
 
     /// <summary>
@@ -64,13 +69,14 @@ public class MagicCubeRemoteControlManager : NetDaemonRxApp
     /// </summary>
     private void PlayPauseMedia()
     {
-        foreach (var player in TvMediaPlayers!)
+        // we are not just using PlayPause service since if the media player is nether we want to ignore it
+        foreach (var player in TvMediaPlayers ?? Array.Empty<MediaPlayerEntity>())
         {
-            var playerState = State(player)?.State;
+            var playerState = player?.State;
             if (playerState == "playing")
-                CallService("media_player", "media_pause", new { entity_id = player });
+                player?.MediaPause();
             else if (playerState == "paused")
-                CallService("media_player", "media_play", new { entity_id = player });
+                player?.MediaPlay();
         }
     }
 
@@ -79,14 +85,12 @@ public class MagicCubeRemoteControlManager : NetDaemonRxApp
     /// </summary>
     private void VolumeUp()
     {
-        CallService("remote", "send_command", new
-        {
-            entity_id = RemoteTVRummet,
-            device = MaranzDeviceId,
-            command = "VolumeUp",
-            num_repeats = 10,
-            delay_secs = 0.01
-        });
+        RemoteTVRummet?.SendCommand(
+            device: MaranzDeviceId,
+            command: "VolumeUp",
+            numRepeats: 10,
+            delaySecs: 0.01
+        );
     }
 
     /// <summary>
@@ -94,14 +98,11 @@ public class MagicCubeRemoteControlManager : NetDaemonRxApp
     /// </summary>
     private void VolumeDown()
     {
-        CallService("remote", "send_command", new
-        {
-            entity_id = RemoteTVRummet,
-            device = MaranzDeviceId,
-            command = "VolumeDown",
-            num_repeats = 10,
-            delay_secs = 0.01
-        });
+        RemoteTVRummet?.SendCommand(
+            device: MaranzDeviceId,
+            command: "VolumeDown",
+            numRepeats: 10,
+            delaySecs: 0.01
+        );
     }
-
 }

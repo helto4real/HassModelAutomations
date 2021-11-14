@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Linq;
 using HomeAssistantGenerated;
@@ -22,12 +21,14 @@ using NetDaemon.HassModel.Extensions;
 [NetDaemonApp]
 public class TVManager
 {
+    private readonly IHaContext _ha;
     private readonly Entities _entities;
     private readonly Services _services;
     private readonly ILogger<TVManager> _log;
     private readonly INetDaemonScheduler _scheduler;
     public TVManager(IHaContext ha, ILogger<TVManager> logger, INetDaemonScheduler scheduler)
     {
+        _ha = ha;
         _entities = new Entities(ha);
         _services = new Services(ha);
         _log = logger;
@@ -48,7 +49,6 @@ public class TVManager
                 e.New.IsOn())
             .Subscribe(s =>
             {
-                _log.LogDebug("TV remote status change from {from} to {to}", s.Old?.State, s.New?.State);
                 OnTVTurnedOn();
             });
 
@@ -60,7 +60,21 @@ public class TVManager
             .Subscribe(s =>
             {
                 _log.LogDebug("TV remote activity change from {from} to {to}", s.Old?.Attributes?.CurrentActivity, s.New?.Attributes?.CurrentActivity);
-                OnTvActivityChange(s.New);
+                switch (s.New?.Attributes?.CurrentActivity)
+                {
+                    case "TV":
+                        _services.Script.TvScene();
+                        break;
+                    case "Film":
+                        _services.Script.FilmScene();
+                        break;
+                    case "PowerOff":
+                        _services.Script.TvOffScene();
+                        _entities.MediaPlayer.ShieldTv.TurnOff();
+                        if (IsNight)
+                            _entities.Light.Tvrummet.TurnOn(transition: 0);
+                        break;
+                }
             });
     }
 
@@ -114,7 +128,7 @@ public class TVManager
                             if (DateTime.Now.Subtract(_timeStoppedPlaying.Value) >= _idleTimeout)
                             {
                                 // Idle timeout went by without any change in state turn off TV
-                                _log.LogInformation($"TV been idle for {_idleTimeout} minutes, turning off");
+                                _log.LogInformation("TV been idle for {IdleTimeOut} minutes, turning off", _idleTimeout);
                             }
                             // If the state did has changed after we waited just run to completion
                         }
@@ -128,20 +142,20 @@ public class TVManager
     /// </summary>
     private void TurnOnTvIfOff(string entityId)
     {
-        // if (!TvIsOn && !_isTurningOnTV)
-        // {
-        //     // Tv is of and there are not an operation turning it on
-        //     _isTurningOnTV = true;
-        //     Log($"TV is not on, pause media {entityId} and turn on tv!");
+        if (!TvIsOn && !_isTurningOnTV)
+        {
+            // Tv is of and there are not an operation turning it on
+            _isTurningOnTV = true;
+            _log.LogInformation("TV is not on, pause media {EntityId} and turn on tv!", entityId);
 
-        //     // Tv and light etc is managed through a RunScript
-        //     RunScript("tv_scene");
-        // }
-        // if (_isTurningOnTV) // Always pause media if TV is turning on
-        // {
-        //     _currentlyPausedMediaPlayer = entityId;
-        //     CallService("media_player", "media_pause", new { entity_id = entityId });
-        // }
+            // Tv and light etc is managed through a RunScript
+            _services.Script.TvScene();
+        }
+        if (_isTurningOnTV) // Always pause media if TV is turning on
+        {
+            _currentlyPausedMediaPlayer = new MediaPlayerEntity(_ha, entityId);
+            _currentlyPausedMediaPlayer.MediaPause();
+        }
     }
 
     /// <summary>
@@ -149,43 +163,19 @@ public class TVManager
     /// </summary>
     public void OnTVTurnedOn()
     {
-        // if (_isTurningOnTV && !string.IsNullOrEmpty(_currentlyPausedMediaPlayer))
-        // {
-        //     // We had just turned on tv with this RunScript and have a media player paused
-        //     // First delay and wait for the TV to get ready
-        //     LogDebug("TV is turning on.. Wait 9 seconds to complete...");
-        //     RunIn(TimeSpan.FromSeconds(9), () =>
-        //     {
-        //         _isTurningOnTV = false;
-        //         if (!MediaIsPlaying)
-        //         {
-        //             CallService("media_player", "media_play", new { entity_id = _currentlyPausedMediaPlayer });
-        //         }
-        //     });
-        // }
+        if (_isTurningOnTV && _currentlyPausedMediaPlayer is not null)
+        {
+            // We had just turned on tv with this RunScript and have a media player paused
+            // First delay and wait for the TV to get ready
+            _log.LogDebug("TV is turning on.. Wait 9 seconds to complete...");
+            _scheduler.RunIn(TimeSpan.FromSeconds(9), () =>
+            {
+                _isTurningOnTV = false;
+                if (!MediaIsPlaying)
+                {
+                    _currentlyPausedMediaPlayer.MediaPlay();
+                }
+            });
+        }
     }
-
-    /// <summary>
-    ///     When TV is activity changes, ie TV, Film or PowerOff.!--
-    ///     This is to manage manual remote activities
-    /// </summary>
-    public void OnTvActivityChange(NetDaemon.HassModel.Entities.EntityState to)
-    {
-        // switch (to?.Attributes?.CurrentActivity)
-        // {
-        //     case "TV":
-        //         _services.Script.TvScene();
-        //         break;
-        //     case "Film":
-        //         _services.Script.FilmScene();
-        //         break;
-        //     case "PowerOff":
-        //         _services.Script.TvOffScene();
-        //         _entities.MediaPlayer.ShieldTv.TurnOff();
-        //         if (IsNight)
-        //             _entities.Light.Tvrummet.TurnOn(transition: 0);
-        //         break;
-        // }
-    }
-
 }
