@@ -6,6 +6,6 @@ magic_cube:
     #     - media_player.shield_tv
 # tv:
 #     class: TVManager
-#     RemoteTVRummet: remote.tvrummet
-#     TvMediaPlayers:
-#         - media_player.shield_tv
+#     # RemoteTVRummet: remote.tvrummet
+#     # TvMediaPlayers:
+#     #     - media_player.shield_tv

@@ -1,15 +1,3 @@
-using System;
-using System.Linq;
-using System.Reactive.Linq;
-using HomeAssistantGenerated;
-using Microsoft.Extensions.Logging;
-using NetDaemon.Common;
-using NetDaemon.Extensions.Scheduler;
-using NetDaemon.HassModel.Common;
-using NetDaemon.HassModel.Entities;
-using NetDaemon.HassModel.Extensions;
-
-
 /// <summary>
 ///     Manage the media in the tv room
 //

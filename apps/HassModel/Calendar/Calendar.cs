@@ -1,11 +1,3 @@
-using System;
-using System.Reactive.Linq;
-using NetDaemon.Common;
-using NetDaemon.Daemon;
-using NetDaemon.HassModel.Common;
-using NetDaemon.HassModel.Entities;
-using HomeAssistantGenerated;
-
 /// <summary>
 ///     Pushes important calendar events to TTS.
 /// </summary>

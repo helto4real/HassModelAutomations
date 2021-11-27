@@ -7,17 +7,7 @@
 // using NetDaemon.Common.Reactive;
 // using NetDaemon.Generated.Reactive;
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using HomeAssistantGenerated;
-using NetDaemon.Common;
-using NetDaemon.HassModel.Common;
-using NetDaemon.HassModel.Entities;
-using NetDaemon.HassModel.Extensions;
 using System.Threading;
-// using Netdaemon.Generated.Extensions;
 
 /// <summary>
 ///     Manage default lights and implements the following use-cases:

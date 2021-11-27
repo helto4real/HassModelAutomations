@@ -1,13 +1,3 @@
-using System;
-using System.Linq;
-using System.Reactive.Linq;
-using NetDaemon.Common;
-using NetDaemon.HassModel.Common;
-using NetDaemon.HassModel.Entities;
-using NetDaemon.Extensions.Scheduler;
-using HomeAssistantGenerated;
-using Microsoft.Extensions.Logging;
-
 /// <summary>
 ///     Manage state of morning, house, day, evening, night and cleaning
 /// </summary>

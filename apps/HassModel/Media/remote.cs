@@ -1,15 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Linq;
-using HomeAssistantGenerated;
-using Microsoft.Extensions.Logging;
-using NetDaemon.Common;
-using NetDaemon.Extensions.Scheduler;
-using NetDaemon.HassModel.Common;
-using NetDaemon.HassModel.Entities;
-using NetDaemon.HassModel.Extensions;
-
 /// <summary>
 ///     Manage remote control using a xiaomi magic cube.
 ///     Following use-cases are implemented
@@ -19,7 +7,7 @@ using NetDaemon.HassModel.Extensions;
 ///     - Flip, pause/play
 /// </summary>
 [NetDaemonApp]
-[Focus]
+// [Focus]
 public class MagicCubeRemoteControlManager : IInitializable
 {
     // private readonly IHaContext _ha;
